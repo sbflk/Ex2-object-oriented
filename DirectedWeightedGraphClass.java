@@ -16,16 +16,30 @@ public class DirectedWeightedGraphClass implements DirectedWeightedGraph {
     public DirectedWeightedGraphClass(HashMap<String, ArrayList<HashMap<String,Double>>> h){
         this.Nodes = h.get("Nodes");
         this.Edges = h.get("Edges");
+        from_node = new HashMap<>();
+        to_node = new HashMap<>();
         for (int i = 0; i < Nodes.size();i++){
-            from_node.put((Double) Nodes.get(i).keySet().toArray()[0], null);
-            to_node.put((Double) Nodes.get(i).keySet().toArray()[0], null);
+            from_node.put(Nodes.get(i).get("id"), new ArrayList<>());
+            to_node.put(Nodes.get(i).get("id"), new ArrayList<>());
         }
         for(HashMap<String,Double> e: Edges){
-
             from_node.get(e.get("src")).add(e.get("dest"));
             to_node.get(e.get("dest")).add(e.get("src"));
         }
     }
+    public ArrayList<HashMap<String,Double>> get_nodes(){
+        return Nodes;
+    }
+    public ArrayList<HashMap<String,Double>> get_edges(){
+        return Edges;
+    }
+    public HashMap<Double, ArrayList<Double>> get_from_node(){
+        return from_node;
+    }
+    public HashMap<Double, ArrayList<Double>> get_to_node(){
+        return to_node;
+    }
+
     @Override
     public NodeData getNode(int key) {
         return null;
