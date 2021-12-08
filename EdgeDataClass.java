@@ -19,7 +19,7 @@ public class EdgeDataClass implements EdgeData{
         this.src = (edge1.get("src")).intValue();
         this.dest = (edge1.get("dest")).intValue();
         this.weight = edge1.get("w");
-        //this.info = info;
+        this.info = "";
         this.tag = 0;
     }
 
