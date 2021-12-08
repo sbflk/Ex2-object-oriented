@@ -1,5 +1,6 @@
 import api.DirectedWeightedGraph;
 import api.EdgeData;
+import api.GeoLocation;
 import api.NodeData;
 
 import java.util.ArrayList;
@@ -8,36 +9,37 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class DirectedWeightedGraphClass implements DirectedWeightedGraph {
-    private ArrayList<HashMap<String,Double>> Nodes;
-    private ArrayList<HashMap<String,Double>> Edges;
-    private HashMap<Double, ArrayList<Double>> from_node;
-    private HashMap<Double, ArrayList<Double>> to_node;
+    private ArrayList<NodeData> Nodes;
+    private ArrayList<EdgeData> Edges;
+    private HashMap<Integer, ArrayList<Integer>> from_node;
+    private HashMap<Integer, ArrayList<Integer>> to_node;
 
     public DirectedWeightedGraphClass(HashMap<String, ArrayList<HashMap<String,Double>>> h){
-        this.Nodes = h.get("Nodes");
-        this.Edges = h.get("Edges");
+        Nodes = new ArrayList<>();
+        for(int i = 0; i < h.get("Nodes").size(); i++){
+            String pos = String.valueOf(h.get("Nodes").get(i).get("pos"));
+            double x = Double.parseDouble(pos.split(",")[0]);
+            double y = Double.parseDouble(pos.split(",")[1]);
+            double z = Double.parseDouble(pos.split(",")[2]);
+            GeoLocation g = new GeoLocationClass(x,y,z);
+            NodeData n = new NodeDataClass(h.get("Nodes").get(i).get("id"),g);
+            Nodes.add(n);
+        }
+        Edges = new ArrayList<>();
+        for (int i = 0; i < h.get("Edges").size(); i++){
+            EdgeData e = new EdgeDataClass(h.get("Edges").get(i));
+            Edges.add(e);
+        }
         from_node = new HashMap<>();
         to_node = new HashMap<>();
         for (int i = 0; i < Nodes.size();i++){
-            from_node.put(Nodes.get(i).get("id"), new ArrayList<>());
-            to_node.put(Nodes.get(i).get("id"), new ArrayList<>());
+            from_node.put(Nodes.get(i).getKey(), new ArrayList<>());
+            to_node.put(Nodes.get(i).getKey(), new ArrayList<>());
         }
-        for(HashMap<String,Double> e: Edges){
-            from_node.get(e.get("src")).add(e.get("dest"));
-            to_node.get(e.get("dest")).add(e.get("src"));
+        for(EdgeData e: Edges){
+            from_node.get(e.getSrc()).add(e.getDest());
+            to_node.get(e.getDest()).add(e.getSrc());
         }
-    }
-    public ArrayList<HashMap<String,Double>> get_nodes(){
-        return Nodes;
-    }
-    public ArrayList<HashMap<String,Double>> get_edges(){
-        return Edges;
-    }
-    public HashMap<Double, ArrayList<Double>> get_from_node(){
-        return from_node;
-    }
-    public HashMap<Double, ArrayList<Double>> get_to_node(){
-        return to_node;
     }
 
     @Override

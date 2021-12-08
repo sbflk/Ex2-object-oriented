@@ -31,14 +31,13 @@ public class Ex2 {
             Object obj = jsonParser.parse(reader);
 
             HashMap<String, ArrayList<HashMap<String, Double>>> h = new Gson().fromJson(obj.toString(), HashMap.class);
-            System.out.println(h);
 
             for(Map.Entry v: h.entrySet()){
                 for (int i = 0; i < h.get(v.getKey()).size();i++){
                     h.get(v.getKey()).set(i,new HashMap<String,Double>(h.get(v.getKey()).get(i)));
                 }
             }
-
+            ans = new DirectedWeightedGraphClass(h);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -46,6 +45,7 @@ public class Ex2 {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return ans;
     }
     /**
@@ -73,6 +73,6 @@ public class Ex2 {
     }
 
     public static void main(String[] args) {
-        getGrapg(args[0]);
+        DirectedWeightedGraph ans = getGrapg(args[0]);
     }
 }
