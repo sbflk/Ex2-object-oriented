@@ -22,6 +22,14 @@ public class EdgeDataClass implements EdgeData{
         this.info = "";
         this.tag = 0;
     }
+    public EdgeDataClass(int src, double w, int dest)
+    {
+        this.src = src;
+        this.weight = w;
+        this.dest = dest;
+        this.info = "";
+        this.tag = 0;
+    }
 
 
 

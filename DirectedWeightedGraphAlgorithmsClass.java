@@ -1,8 +1,13 @@
-import api.DirectedWeightedGraph;
-import api.DirectedWeightedGraphAlgorithms;
-import api.EdgeData;
-import api.NodeData;
+import api.*;
+import com.google.gson.Gson;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class DirectedWeightedGraphAlgorithmsClass implements DirectedWeightedGraphAlgorithms {
@@ -27,13 +32,133 @@ public class DirectedWeightedGraphAlgorithmsClass implements DirectedWeightedGra
 
     @Override
     public DirectedWeightedGraph copy() {
-        return null;
+        DirectedWeightedGraphClass new_g = null;
+        ArrayList<EdgeData> edges = new ArrayList<EdgeData>();
+        HashMap<Double, NodeData> nodes = new HashMap<>();
+
+        // deep copy of the edges
+        Iterator<EdgeData> it = this.g.edgeIter();
+        while(it.hasNext())
+        {
+            EdgeData e = it.next();
+            EdgeDataClass e1 = new EdgeDataClass(e.getSrc(),e.getWeight(),e.getDest());
+            edges.add(e1);
+        }
+
+        // deep copy of the Nodes
+        Iterator<NodeData> it1 = this.g.nodeIter();
+        while(it1.hasNext())
+        {
+            NodeData n = it1.next();
+            GeoLocation pos = n.getLocation();
+            GeoLocation new_pos = new GeoLocationClass(pos.x(),pos.y(),pos.z());
+            NodeDataClass n1 = new NodeDataClass(n.getKey(), new_pos);
+            nodes.put((double)n1.getKey(), n1);
+        }
+
+        DirectedWeightedGraphClass g = new DirectedWeightedGraphClass(nodes, edges);
+        return g;
+    }
+    // a function to check if we can reach every vertex from a certain vertex(v)
+    // we know if we reached a vertex if in the index of the array there is true, and the index
+    // is the vertex id.
+
+    public void dfs(int v, boolean[] visited)
+    {
+        // we reach the vertex we are in
+        visited[v] = true;
+        int dest;
+        // we get iterator of all the edges tht we are the source of them
+        Iterator<EdgeData> it = this.g.edgeIter(v);
+        while(it.hasNext())
+        {
+            //we see if we havent visited a vertex we can reach with the edges of this vertex
+            EdgeDataClass edge = (EdgeDataClass) it.next();
+            dest = edge.getDest();
+            // if we havent visited, we visit and update the array recursively.
+            if(!visited[dest])
+            {
+                dfs(dest, visited);
+            }
+        }
+    }
+
+    // a function to revese the edges in the graph
+    public DirectedWeightedGraphAlgorithmsClass reverseGraph()
+    {
+        // creating a copy of this graph
+        DirectedWeightedGraphAlgorithms new_ga = new DirectedWeightedGraphAlgorithmsClass(this.g);
+        DirectedWeightedGraphClass copy_graph = (DirectedWeightedGraphClass) new_ga.copy();
+
+        ArrayList<EdgeData> edges = new ArrayList<>();
+        Iterator<EdgeData> it = copy_graph.edgeIter();
+        // moving through the edges, saving them as reverse edge in an array, and erasing the originals.
+        while(it.hasNext())
+        {
+            EdgeDataClass edge = (EdgeDataClass) it.next();
+            EdgeDataClass new_edge = new EdgeDataClass(edge.getDest(), edge.getWeight(), edge.getSrc());
+            edges.add(new_edge);
+            it.remove();
+        }
+
+        // adding the revese edge we created and reversing the graph
+        Iterator<EdgeData> new_it = edges.iterator();
+        while(new_it.hasNext())
+        {
+            EdgeDataClass new_edge = (EdgeDataClass)new_it.next();
+            copy_graph.connect(new_edge.getSrc(),new_edge.getDest(), new_edge.getWeight());
+        }
+
+        // putting the graph to this class so we can use it in the dfs function of this class
+        DirectedWeightedGraphAlgorithmsClass new_copy_graph = new DirectedWeightedGraphAlgorithmsClass(copy_graph);
+        return new_copy_graph;
     }
 
     @Override
     public boolean isConnected() {
-        return false;
+        // create an array of the vertex we visited and fiil it with false
+        boolean[] visited = new boolean[this.g.nodeSize()];
+        int i;
+        for(i = 0; i < this.g.nodeSize(); i++)
+        {
+            visited[i] = false;
+        }
+        // using a function to see if we can get to every vertex from vertex 0
+        dfs(0, visited);
+
+
+        // if we didnt get to every vertex from vertex 0, we return false
+        for(i = 0; i < this.g.nodeSize(); i++)
+        {
+            if(!visited[i]) {
+                return false;
+            }
+        }
+
+        // we create a reverse graph
+        DirectedWeightedGraphAlgorithmsClass gr = reverseGraph();
+        // we fill the visited array with false, because we now check the reverse graph
+        // so we start from the beginning.
+        for(i = 0; i < this.g.nodeSize(); i++)
+        {
+            visited[i] = false;
+        }
+
+        // we now check if vertex 0 can reach every node in this reverse graph
+        gr.dfs(0, visited);
+
+        // if we didnt reach a vertex, return false
+        for(i = 0; i < this.g.nodeSize(); i++)
+        {
+            if(!visited[i]) {
+                return false;
+            }
+        }
+
+        return true;
     }
+
+
 
     @Override
     public double shortestPathDist(int src, int dest) {
@@ -210,11 +335,92 @@ public class DirectedWeightedGraphAlgorithmsClass implements DirectedWeightedGra
 
     @Override
     public boolean save(String file) {
+        //        take the iterators
+        JSONObject obj = new JSONObject();
+        JSONArray edges_array = new JSONArray();
+        JSONArray nodes_array = new JSONArray();
+        FileWriter file1 = null;
+
+
+        Iterator<NodeData> ite_n = this.g.nodeIter();
+        Iterator<EdgeData> ite_e = this.g.edgeIter();
+
+        while(ite_e.hasNext())
+        {
+            EdgeDataClass next = (EdgeDataClass) ite_e.next();
+            JSONObject e1 = new JSONObject();
+            e1.put("src", next.getSrc());
+            e1.put("w", next.getWeight());
+            e1.put("dest", next.getDest());
+            edges_array.add(e1);
+        }
+        obj.put("Edges", edges_array);
+
+        while(ite_n.hasNext())
+        {
+            NodeDataClass next1 = (NodeDataClass) ite_n.next();
+            JSONObject n1 = new JSONObject();
+            GeoLocation p1 = next1.getLocation();
+            String pos = String.valueOf(p1.x()) + "," + String.valueOf(p1.y()) + "," + String.valueOf(p1.z());
+            n1.put("pos", pos);
+            n1.put("id", next1.getKey());
+            nodes_array.add(n1);
+        }
+
+        obj.put("Nodes", nodes_array);
+
+        try {
+
+            // Constructs a FileWriter given a file name, using the platform's default charset
+            file1 = new FileWriter(file);
+            file1.write(obj.toJSONString());
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+
+        } finally {
+
+            try {
+                file1.flush();
+                file1.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+
         return false;
     }
 
     @Override
     public boolean load(String file) {
+        DirectedWeightedGraphClass ans = null;
+        JSONParser jsonParser = new JSONParser();
+
+        try (FileReader reader = new FileReader(file)) {
+            //Read JSON file
+            Object obj = jsonParser.parse(reader);
+
+            HashMap<String, ArrayList<HashMap<String, Double>>> h = new Gson().fromJson(obj.toString(), HashMap.class);
+
+            for(Map.Entry v: h.entrySet()){
+                for (int i = 0; i < h.get(v.getKey()).size();i++){
+                    h.get(v.getKey()).set(i,new HashMap<String,Double>(h.get(v.getKey()).get(i)));
+                }
+            }
+            ans = new DirectedWeightedGraphClass(h);
+            this.g = ans;
+            return true;
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 }

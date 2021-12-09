@@ -77,7 +77,10 @@ public class Ex2 {
 
         DirectedWeightedGraph ans = getGrapg(args[0]);
         DirectedWeightedGraphAlgorithms g = new DirectedWeightedGraphAlgorithmsClass((DirectedWeightedGraphClass) ans);
-        System.out.print(g.shortestPathDist(8,13));
+        g.getGraph().removeEdge(0,1);
+        g.save(args[1]);
+        System.out.print(g.isConnected());
+        /*System.out.print(g.shortestPathDist(8,13));
         System.out.print("\n");
         ArrayList<NodeData> path = (ArrayList<NodeData>) g.shortestPath(8,13);
         for (int i = 0; i < path.size(); i++) {
@@ -100,7 +103,10 @@ public class Ex2 {
                 System.out.print(ans1.get(i).getKey());
                 System.out.print("\n");
             }
-        }
+        }*/
+
+
+
 
 
     }
