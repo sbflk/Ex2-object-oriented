@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import api.NodeData;
 import com.google.gson.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -73,6 +74,34 @@ public class Ex2 {
     }
 
     public static void main(String[] args) {
+
         DirectedWeightedGraph ans = getGrapg(args[0]);
+        DirectedWeightedGraphAlgorithms g = new DirectedWeightedGraphAlgorithmsClass((DirectedWeightedGraphClass) ans);
+        System.out.print(g.shortestPathDist(8,13));
+        System.out.print("\n");
+        ArrayList<NodeData> path = (ArrayList<NodeData>) g.shortestPath(8,13);
+        for (int i = 0; i < path.size(); i++) {
+            System.out.print(path.get(i).getKey() + ", ");
+        }
+        System.out.print("\n");
+        System.out.print(g.center().getKey());
+        System.out.print("\n");
+        System.out.print("\n");
+        List<NodeData> cities = new ArrayList<>();
+        cities.add(g.getGraph().getNode(0));
+        cities.add(g.getGraph().getNode(6));
+        cities.add(g.getGraph().getNode(5));
+        cities.add(g.getGraph().getNode(7));
+        //cities.add(g.getGraph().getNode(9));
+        //cities.add(g.getGraph().getNode(11));
+        List<NodeData> ans1 =  g.tsp(cities);
+        if (ans1 != null){
+            for (int i = 0; i < ans1.size(); i++) {
+                System.out.print(ans1.get(i).getKey());
+                System.out.print("\n");
+            }
+        }
+
+
     }
 }
