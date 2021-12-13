@@ -414,13 +414,12 @@ public class DirectedWeightedGraphAlgorithmsClass implements DirectedWeightedGra
             return true;
         }
         catch (FileNotFoundException e) {
-            e.printStackTrace();
+            return false;
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            return false;
         }
 
-        return false;
     }
 }

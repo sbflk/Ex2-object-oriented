@@ -121,6 +121,9 @@ public class DirectedWeightedGraphClass implements DirectedWeightedGraph {
             Edges.remove(edge.getValue());
         }
         to_node.remove(key);
+        for (Map.Entry node : from_node.entrySet()){
+            from_node.get(node.getKey()).remove(key);
+        }
         mc++;
         return n;
     }
