@@ -18,6 +18,11 @@ public class GuiRun extends JFrame implements ActionListener {
     // all the buttons
     private MenuItem connect;
     private MenuItem removeNode;
+    private MenuItem center;
+    private MenuItem shortest_path_dist;
+    private MenuItem shortest_path;
+    private MenuItem is_connected;
+    private MenuItem tsp;
 
     public GuiRun(DirectedWeightedGraphAlgorithmsClass algo) {
         //setVisible(true);
@@ -26,7 +31,6 @@ public class GuiRun extends JFrame implements ActionListener {
         this.y_size = 800;
         initFrame();
         addMenu();
-        //DrawGraph(algo);
         //paint(getGraphics());
     }
 
@@ -51,6 +55,16 @@ public class GuiRun extends JFrame implements ActionListener {
         removeNode = new MenuItem("Remove Node");
         edit.add(connect);
         edit.add(removeNode);
+        center = new MenuItem("Center");
+        shortest_path = new MenuItem("Shortest Path");
+        shortest_path_dist = new MenuItem("Shortest Path Dist");
+        tsp = new MenuItem("Tsp");
+        is_connected = new MenuItem(" Is Connected");
+        run.add(center);
+        run.add(shortest_path_dist);
+        run.add(shortest_path);
+        run.add(tsp);
+        run.add(is_connected);
     }
 
 
@@ -100,31 +114,35 @@ public class GuiRun extends JFrame implements ActionListener {
                 int dest_final_x = (int) (dest_x*x_size);
                 int dest_final_y = (int) (dest_y*y_size);
                 g.drawLine(final_x + 5,final_y + 5,dest_final_x + 5,dest_final_y + 5);
-                ArrayList<Integer> triangle_points = new ArrayList<>();
-                if ((final_x > dest_final_x && final_y > dest_final_y) || (final_x < dest_final_x && final_y < dest_final_y)){
-                    triangle_points.add(dest_final_x + 3);
-                    triangle_points.add(dest_final_y + 3);
-                    triangle_points.add(dest_final_x - 3);
-                    triangle_points.add(dest_final_y - 3);
-                }
-                else{
-                    triangle_points.add(dest_final_x + 3);
-                    triangle_points.add(dest_final_y - 3);
-                    triangle_points.add(dest_final_x - 3);
-                    triangle_points.add(dest_final_y + 3);
-                }
-                int[] x_points = {dest_final_x + 5,triangle_points.get(0),triangle_points.get(2)};
-                int[] y_points = {dest_final_y + 5,triangle_points.get(1),triangle_points.get(3)};
-                g.setColor(Color.BLACK);
-                g.drawPolygon(x_points,y_points,3);
+                draw_arrow(g, final_x + 5,final_y + 5,dest_final_x + 5,dest_final_y + 5, 6,5);
                 g.setColor(Color.RED);
             }
         }
     }
 
+    public void draw_arrow(Graphics g, int x1, int y1, int x2, int y2, int d, int h){
+        int dx = x2 - x1, dy = y2 - y1;
+        double D = Math.sqrt(dx*dx + dy*dy);
+        double xm = D - d, xn = xm, ym = h, yn = -h, x;
+        double sin = dy / D, cos = dx / D;
+
+        x = xm*cos - ym*sin + x1;
+        ym = xm*sin + ym*cos + y1;
+        xm = x;
+
+        x = xn*cos - yn*sin + x1;
+        yn = xn*sin + yn*cos + y1;
+        xn = x;
+
+        int[] xpoints = {x2, (int) xm, (int) xn};
+        int[] ypoints = {y2, (int) ym, (int) yn};
+        g.setColor(Color.BLACK);
+        g.fillPolygon(xpoints,ypoints,3);
+
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-
 
     }
 }
